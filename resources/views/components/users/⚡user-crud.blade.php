@@ -224,6 +224,10 @@ new class extends Component {
                                     <flux:button size="sm" wire:click="edit({{ $user->id }})">
                                         Edit
                                     </flux:button>
+                                    <a href="{{ route('users.plan.edit', $user->id) }}"
+   class="rounded-md bg-purple-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-700">
+    Set Plan
+</a>
 
                                     <flux:button
                                         size="sm"

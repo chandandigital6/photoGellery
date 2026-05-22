@@ -8,32 +8,148 @@ use Illuminate\Support\Facades\Storage;
 
 class ImageToolController extends Controller
 {
-   public function index(Request $request)
+//    public function index(Request $request)
+// {
+//     $selectedDate = $request->get('date', date('Y-m-d'));
+
+//     $images = UploadedImage::where('user_id', auth()->id())
+//     ->whereDate('upload_date', $selectedDate)
+//     ->latest()
+//     ->get();
+
+//     return view('image_tool.index', compact('images', 'selectedDate'));
+// }
+
+
+
+public function index(Request $request)
 {
     $selectedDate = $request->get('date', date('Y-m-d'));
+    $user = auth()->user();
 
-    $images = UploadedImage::whereDate('upload_date', $selectedDate)
+    $plan = \App\Models\UserPlan::where('user_id', $user->id)
+        ->where('is_active', true)
+        ->whereDate('start_date', '<=', now())
+        ->whereDate('end_date', '>=', now())
+        ->latest()
+        ->first();
+
+    $images = UploadedImage::where('user_id', $user->id)
+        ->whereDate('upload_date', $selectedDate)
         ->latest()
         ->get();
 
-    return view('image_tool.index', compact('images', 'selectedDate'));
+    $dateWiseStats = UploadedImage::where('user_id', $user->id)
+        ->selectRaw('DATE(upload_date) as date')
+        ->selectRaw('COUNT(*) as total_uploaded')
+        ->selectRaw('SUM(CASE WHEN generated_image IS NOT NULL THEN 1 ELSE 0 END) as total_generated')
+        ->groupByRaw('DATE(upload_date)')
+        ->orderByDesc('date')
+        ->get();
+
+    $usedBytesQuery = \App\Models\UserUsage::where('user_id', $user->id);
+
+    if ($plan) {
+        if ($plan->limit_type === 'daily') {
+            $usedBytesQuery->whereDate('usage_date', today());
+        }
+
+        if ($plan->limit_type === 'monthly') {
+            $usedBytesQuery->whereYear('usage_date', now()->year)
+                ->whereMonth('usage_date', now()->month);
+        }
+
+        if ($plan->limit_type === 'yearly') {
+            $usedBytesQuery->whereYear('usage_date', now()->year);
+        }
+    }
+
+    $usedBytes = $usedBytesQuery->sum('used_bytes');
+    $limitBytes = $plan ? $plan->limit_mb * 1024 * 1024 : 0;
+
+    $usageSummary = [
+        'plan' => $plan,
+        'limit_mb' => $plan?->limit_mb ?? 0,
+        'limit_type' => $plan?->limit_type ?? 'No Plan',
+        'used_mb' => round($usedBytes / 1024 / 1024, 2),
+        'remaining_mb' => $plan ? max(0, round(($limitBytes - $usedBytes) / 1024 / 1024, 2)) : 0,
+        'uploaded_today_count' => $images->count(),
+        'generated_today_count' => $images->whereNotNull('generated_image')->count(),
+    ];
+
+    return view('image_tool.index', compact(
+        'images',
+        'selectedDate',
+        'usageSummary',
+        'dateWiseStats'
+    ));
 }
 
-  public function upload(Request $request)
+public function upload(Request $request)
 {
     $request->validate([
         'file' => ['required', 'image', 'mimes:jpg,jpeg,png,webp'],
         'upload_date' => ['required', 'date'],
     ]);
 
+    $user = auth()->user();
+
+    $plan = \App\Models\UserPlan::where('user_id', $user->id)
+        ->where('is_active', true)
+        ->whereDate('start_date', '<=', now())
+        ->whereDate('end_date', '>=', now())
+        ->latest()
+        ->first();
+
+    if (!$plan) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Aapka koi active plan nahi hai.',
+        ], 403);
+    }
+
+    $fileSize = $request->file('file')->getSize();
+    $limitBytes = $plan->limit_mb * 1024 * 1024;
+
+    $query = \App\Models\UserUsage::where('user_id', $user->id);
+
+    if ($plan->limit_type === 'daily') {
+        $query->whereDate('usage_date', today());
+    }
+
+    if ($plan->limit_type === 'monthly') {
+        $query->whereYear('usage_date', now()->year)
+              ->whereMonth('usage_date', now()->month);
+    }
+
+    if ($plan->limit_type === 'yearly') {
+        $query->whereYear('usage_date', now()->year);
+    }
+
+    $usedBytes = $query->sum('used_bytes');
+
+    if (($usedBytes + $fileSize) > $limitBytes) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Upload limit complete ho chuki hai. Aapka plan limit: '.$plan->limit_mb.' MB '.$plan->limit_type,
+        ], 403);
+    }
+
     $date = $request->upload_date;
     $folder = 'uploads/images/' . $date;
 
     $path = $request->file('file')->store($folder, 'public');
 
-    UploadedImage::create([
+    \App\Models\UploadedImage::create([
+        'user_id' => $user->id,
         'upload_date' => $date,
         'original_image' => $path,
+    ]);
+
+    \App\Models\UserUsage::create([
+        'user_id' => $user->id,
+        'usage_date' => today(),
+        'used_bytes' => $fileSize,
     ]);
 
     return response()->json([
@@ -60,11 +176,19 @@ public function generate(Request $request)
     $logoSizePercent = (int) $request->logo_size;
     $opacityPercent = (int) $request->opacity;
 
-    $images = UploadedImage::whereDate('upload_date', $generateDate)->get();
+    // $images = UploadedImage::whereDate('upload_date', $generateDate)->get();
+    // $images = UploadedImage::where('user_id', auth()->id())
+    // ->whereDate('upload_date', $generateDate)
+    // ->get();
 
-    if ($images->isEmpty()) {
-        return back()->with('success', 'Is date par koi image nahi mili.');
-    }
+    $images = UploadedImage::where('user_id', auth()->id())
+    ->whereDate('upload_date', $generateDate)
+    ->whereNull('generated_image') // sirf non-generated images
+    ->get();
+
+   if ($images->isEmpty()) {
+    return back()->with('success', 'Is date ki sabhi images already generated hain.');
+}
 
     $logoPath = $request->file('logo')->store('uploads/logos/' . $generateDate, 'public');
     $logoFullPath = storage_path('app/public/' . $logoPath);
@@ -182,6 +306,37 @@ public function generate(Request $request)
         ->route('image.tool', ['date' => $generateDate])
         ->with('success', 'Selected date ke saare images generate ho gaye.');
 }
+
+
+
+
+
+  public function uploadold(Request $request)
+{
+    $request->validate([
+        'file' => ['required', 'image', 'mimes:jpg,jpeg,png,webp'],
+        'upload_date' => ['required', 'date'],
+    ]);
+
+    $date = $request->upload_date;
+    $folder = 'uploads/images/' . $date;
+
+    $path = $request->file('file')->store($folder, 'public');
+
+    UploadedImage::create([
+        'upload_date' => $date,
+        'original_image' => $path,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'path' => asset('storage/' . $path),
+    ]);
+}
+
+
+
+
 
 public function generatelogosize(Request $request)
 {

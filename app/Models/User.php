@@ -50,4 +50,28 @@ class User extends Authenticatable
             ->map(fn ($word) => Str::substr($word, 0, 1))
             ->implode('');
     }
+
+
+
+    public function activePlan()
+{
+    return $this->hasOne(\App\Models\UserPlan::class)
+        ->where('is_active', true)
+        ->whereDate('start_date', '<=', now())
+        ->whereDate('end_date', '>=', now())
+        ->latest();
+}
+
+public function usages()
+{
+    return $this->hasMany(\App\Models\UserUsage::class);
+}
+
+
+public function uploadedImages()
+{
+    return $this->hasMany(\App\Models\UploadedImage::class);
+}
+
+
 }
