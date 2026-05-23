@@ -20,65 +20,65 @@
         </p>
     </div>
 
-    {{-- PLAN SUMMARY --}}
-    <div class="grid gap-4 md:grid-cols-5">
+   {{-- PLAN SUMMARY --}}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-        <div
-            class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-            <p class="text-sm text-neutral-500 dark:text-neutral-400">
-                Plan Type
-            </p>
+    <div
+        class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+        <p class="text-sm text-neutral-500 dark:text-neutral-400">
+            Plan Type
+        </p>
 
-            <h3 class="mt-2 text-2xl font-bold uppercase text-blue-600">
-                {{ $usageSummary['limit_type'] }}
-            </h3>
-        </div>
-
-        <div
-            class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-            <p class="text-sm text-neutral-500 dark:text-neutral-400">
-                Total Limit
-            </p>
-
-            <h3 class="mt-2 text-2xl font-bold text-neutral-900 dark:text-white">
-                {{ $usageSummary['limit_mb'] }} MB
-            </h3>
-        </div>
-
-        <div
-            class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-            <p class="text-sm text-neutral-500 dark:text-neutral-400">
-                Used Storage
-            </p>
-
-            <h3 class="mt-2 text-2xl font-bold text-orange-600">
-                {{ $usageSummary['used_mb'] }} MB
-            </h3>
-        </div>
-
-        <div
-            class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-            <p class="text-sm text-neutral-500 dark:text-neutral-400">
-                Remaining
-            </p>
-
-            <h3 class="mt-2 text-2xl font-bold text-green-600">
-                {{ $usageSummary['remaining_mb'] }} MB
-            </h3>
-        </div>
-
-        <div
-            class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-            <p class="text-sm text-neutral-500 dark:text-neutral-400">
-                Generated Today
-            </p>
-
-            <h3 class="mt-2 text-2xl font-bold text-purple-600">
-                {{ $usageSummary['generated_today_count'] }}/{{ $usageSummary['uploaded_today_count'] }}
-            </h3>
-        </div>
+        <h3 class="mt-2 text-2xl font-bold uppercase text-blue-600">
+            {{ $usageSummary['limit_type'] }}
+        </h3>
     </div>
 
+    <div
+        class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+        <p class="text-sm text-neutral-500 dark:text-neutral-400">
+            Total Limit
+        </p>
+
+        <h3 class="mt-2 text-2xl font-bold text-neutral-900 dark:text-white">
+            {{ $usageSummary['limit_mb'] }} MB
+        </h3>
+    </div>
+
+    <div
+        class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+        <p class="text-sm text-neutral-500 dark:text-neutral-400">
+            Used Storage
+        </p>
+
+        <h3 class="mt-2 text-2xl font-bold text-orange-600">
+            {{ $usageSummary['used_mb'] }} MB
+        </h3>
+    </div>
+
+    <div
+        class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+        <p class="text-sm text-neutral-500 dark:text-neutral-400">
+            Remaining
+        </p>
+
+        <h3 class="mt-2 text-2xl font-bold text-green-600">
+            {{ $usageSummary['remaining_mb'] }} MB
+        </h3>
+    </div>
+
+    <div
+        class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+        <p class="text-sm text-neutral-500 dark:text-neutral-400">
+            Generated Today
+        </p>
+
+        <h3 class="mt-2 text-2xl font-bold text-purple-600">
+            {{ $usageSummary['generated_today_count'] }}/{{ $usageSummary['uploaded_today_count'] }}
+        </h3>
+    </div>
+
+</div>
     {{-- DATE WISE REPORT --}}
     <div
         class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
