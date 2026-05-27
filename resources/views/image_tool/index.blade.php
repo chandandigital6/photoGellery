@@ -1,3 +1,4 @@
+```blade
 <x-layouts::app :title="__('Image Tool')">
 
 <div class="flex h-full w-full flex-1 flex-col gap-6 rounded-xl">
@@ -182,32 +183,68 @@
         <div class="grid gap-6 lg:grid-cols-2">
 
             {{-- LEFT PREVIEW --}}
-         {{-- LEFT PREVIEW --}}
-<div>
-    <div class="relative flex min-h-[360px] items-center justify-center overflow-hidden rounded-2xl border border-neutral-300 bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800">
+            <div>
+                <div class="relative flex min-h-[360px] items-center justify-center overflow-hidden rounded-2xl border border-neutral-300 bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800">
 
-        @if(count($images))
-            <img id="previewMainImage"
-                src="{{ asset('storage/' . $images[0]->original_image) }}"
-                class="max-h-[520px] w-full rounded-2xl object-contain">
-        @else
-            <div class="flex h-80 items-center justify-center text-neutral-500">
-                No image found. Upload image first.
+                    @if(count($images))
+                        <img id="previewMainImage"
+                            src="{{ asset('storage/' . $images[0]->original_image) }}"
+                            class="max-h-[520px] w-full rounded-2xl object-contain">
+                    @else
+                        <div class="flex h-80 items-center justify-center text-neutral-500">
+                            No image found. Upload image first.
+                        </div>
+                    @endif
+
+                    <img id="previewLogo"
+                        src=""
+                        class="absolute hidden"
+                        style="width:18%; opacity:1; top:30px; right:30px;">
+                </div>
+
+                {{-- IMAGE PREVIEW SLIDER --}}
+                @if(count($images))
+                    <p class="mt-3 text-xs text-neutral-500">
+                        Slider se image select karke preview dekho.
+                    </p>
+
+                    <div class="relative mt-4">
+                        <button type="button"
+                            id="thumbPrev"
+                            class="absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/70 px-3 py-2 text-white shadow hover:bg-black">
+                            ‹
+                        </button>
+
+                        <div id="thumbSlider"
+                            class="flex gap-3 overflow-x-auto scroll-smooth px-10 pb-2"
+                            style="scrollbar-width:none; -ms-overflow-style:none;">
+
+                            @foreach($images as $key => $img)
+                                <button type="button"
+                                    class="preview-thumb h-24 min-w-[140px] overflow-hidden rounded-xl border-2 bg-neutral-100 transition {{ $key === 0 ? 'border-blue-600' : 'border-transparent' }}"
+                                    data-src="{{ asset('storage/' . $img->original_image) }}">
+
+                                    <img src="{{ asset('storage/' . $img->original_image) }}"
+                                        class="h-full w-full object-cover">
+                                </button>
+                            @endforeach
+
+                        </div>
+
+                        <button type="button"
+                            id="thumbNext"
+                            class="absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/70 px-3 py-2 text-white shadow hover:bg-black">
+                            ›
+                        </button>
+                    </div>
+
+                    <style>
+                        #thumbSlider::-webkit-scrollbar {
+                            display: none;
+                        }
+                    </style>
+                @endif
             </div>
-        @endif
-
-        <img id="previewLogo"
-            src=""
-            class="absolute hidden"
-            style="width:18%; opacity:1; top:30px; right:30px;">
-    </div>
-
-    @if(count($images))
-        <p class="mt-3 text-xs text-neutral-500">
-            Ye sirf sample preview image hai. Generate karne par same logo setting sabhi non-generated images par apply hogi.
-        </p>
-    @endif
-</div>
 
             {{-- RIGHT CONTROLS --}}
             <div class="space-y-4">
@@ -403,6 +440,26 @@ document.addEventListener('DOMContentLoaded', function () {
             this.classList.add('border-blue-600');
         });
     });
+
+    const thumbSlider = document.getElementById('thumbSlider');
+    const thumbPrev = document.getElementById('thumbPrev');
+    const thumbNext = document.getElementById('thumbNext');
+
+    if (thumbSlider && thumbPrev && thumbNext) {
+        thumbPrev.addEventListener('click', function () {
+            thumbSlider.scrollBy({
+                left: -300,
+                behavior: 'smooth'
+            });
+        });
+
+        thumbNext.addEventListener('click', function () {
+            thumbSlider.scrollBy({
+                left: 300,
+                behavior: 'smooth'
+            });
+        });
+    }
 
     if (logoInput) {
         logoInput.addEventListener('change', function(e) {
