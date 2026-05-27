@@ -137,7 +137,7 @@
     </div>
 
     {{-- DATE FILTER --}}
-    <form method="GET" action="{{ route('image.tool') }}"
+    {{-- <form method="GET" action="{{ route('image.tool') }}"
         class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
 
         <h2 class="mb-4 text-2xl font-bold text-neutral-900 dark:text-white">
@@ -163,7 +163,7 @@
                 </button>
             </div>
         </div>
-    </form>
+    </form> --}}
 
     {{-- GENERATE WITH LIVE PREVIEW --}}
     <form method="POST"
