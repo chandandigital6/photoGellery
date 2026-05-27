@@ -1,4 +1,3 @@
-```blade
 <x-layouts::app :title="__('Image Tool')">
 
 <div class="flex h-full w-full flex-1 flex-col gap-6 rounded-xl">
@@ -563,4 +562,4 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 
 </x-layouts::app>
-```
+
