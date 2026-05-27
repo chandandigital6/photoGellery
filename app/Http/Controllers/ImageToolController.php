@@ -8,17 +8,6 @@ use Illuminate\Support\Facades\Storage;
 
 class ImageToolController extends Controller
 {
-//    public function index(Request $request)
-// {
-//     $selectedDate = $request->get('date', date('Y-m-d'));
-
-//     $images = UploadedImage::where('user_id', auth()->id())
-//     ->whereDate('upload_date', $selectedDate)
-//     ->latest()
-//     ->get();
-
-//     return view('image_tool.index', compact('images', 'selectedDate'));
-// }
 
 
 
